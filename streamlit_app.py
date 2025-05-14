@@ -7,21 +7,29 @@ import numpy as np
 st.set_page_config(page_title="YOLOv8 Animal Detection", layout="wide")
 
 st.title("🦁 Detección de animales con YOLOv8")
-st.markdown("Este demo usa la webcam para detectar animales usando un modelo YOLOv8 preentrenado.")
+st.markdown(
+    """
+    Esta aplicación detecta animales en tiempo real usando tu cámara web con el modelo **YOLOv8**.
+    
+    Modelo usado: `yolov8n.pt` (preentrenado en COCO)
+    """
+)
 
-# Carga del modelo
+# Carga del modelo YOLO desde la raíz del proyecto
 @st.cache_resource
 def load_model():
-    return YOLO("yolo-Weights/yolov8n.pt")
+    return YOLO("yolov8n.pt")  # ← Cambiado aquí
 
 model = load_model()
 
 # Clases permitidas
-allowed_classes = ["bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe"]
+allowed_classes = [
+    "bird", "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe"
+]
 
-# Botón para activar cámara
+# Interfaz
 start = st.button("📷 Iniciar cámara")
-
 frame_window = st.image([])
 
 if start:
@@ -29,7 +37,6 @@ if start:
     captura.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
     captura.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
-    st.info("Presiona 'Detener' para finalizar la cámara.")
     stop = st.button("⛔ Detener")
 
     while captura.isOpened():
@@ -38,7 +45,6 @@ if start:
             st.error("No se puede acceder a la cámara.")
             break
 
-        # Realiza detección
         results = model(img, stream=True)
 
         for r in results:
@@ -56,11 +62,9 @@ if start:
                                 (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
                                 (0, 255, 0), 2)
 
-        # Convertir BGR a RGB
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         frame_window.image(img_rgb)
 
-        # Permitir detener el proceso
         if stop:
             captura.release()
             break
